@@ -22,7 +22,7 @@ model.add(Dense(input_units, input_dim=input_units, activation='relu'))
 
 model.add(Dense(output_units, activation='softmax'))
 
-model.compile(loss='binary_crossentropy',
+model.compile(loss='categorical_crossentropy',
               optimizer='adam', metrics=['accuracy'])
 model.fit(X, Y, epochs=250, batch_size=250,
           shuffle=True, validation_split=0.05, verbose=2)
