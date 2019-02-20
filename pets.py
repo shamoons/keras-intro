@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 import numpy
 import pandas as pd
 
@@ -16,12 +16,16 @@ input_units = X.shape[1]
 
 model = Sequential()
 model.add(Dense(input_units, input_dim=input_units, activation='relu'))
+
+model.add(Dropout(0.25))
 model.add(Dense(input_units, activation='relu'))
 
 model.add(Dense(1, activation='sigmoid'))
+
 model.compile(loss='binary_crossentropy',
               optimizer='adam', metrics=['accuracy'])
 model.fit(X, Y, epochs=250, batch_size=250,
           shuffle=True, validation_split=0.05, verbose=2)
+
 scores = model.evaluate(X, Y)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
