@@ -4,6 +4,7 @@ import pandas as pd
 from tensorflow.python.client import device_lib
 from dotenv import load_dotenv
 import kappa
+import os
 load_dotenv()
 
 print(device_lib.list_local_devices())
