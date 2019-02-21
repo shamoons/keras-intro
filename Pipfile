@@ -10,7 +10,6 @@ pandas = "*"
 keras = "*"
 numpy = "*"
 tensorflow = "*"
-livelossplot = "*"
 dotenv = "*"
 
 [requires]
