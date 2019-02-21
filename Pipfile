@@ -11,6 +11,7 @@ keras = "*"
 numpy = "*"
 tensorflow = "*"
 livelossplot = "*"
+dotenv = "*"
 
 [requires]
 python_version = "3.6"
