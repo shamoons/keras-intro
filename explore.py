@@ -1,8 +1,13 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 import pandas as pd
+from tensorflow.python.client import device_lib
+from dotenv import load_dotenv
+load_dotenv()
 
-datapath = '/Volumes/MoonFlash/kaggle-data'
+print(device_lib.list_local_devices())
+
+datapath = os.environ['DATA_PATH']
 
 X = pd.read_csv(datapath + '/train.csv')
 Y = pd.read_csv(datapath + '/train.csv', header=0, usecols=['AdoptionSpeed'])
@@ -24,8 +29,8 @@ model.add(Dense(output_units, activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',
               optimizer='adam', metrics=['accuracy'])
-model.fit(X, Y, epochs=250, batch_size=250,
-          shuffle=True, validation_split=0.05, verbose=2)
+model.fit(X, Y, epochs=50, batch_size=100, shuffle=True,
+          validation_split=0.05, verbose=2)
 
 scores = model.evaluate(X, Y)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))

@@ -10,6 +10,7 @@ pandas = "*"
 keras = "*"
 numpy = "*"
 tensorflow = "*"
+livelossplot = "*"
 
 [requires]
 python_version = "3.6"
