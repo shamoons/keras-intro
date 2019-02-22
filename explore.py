@@ -1,5 +1,6 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
+from keras.optimizers import SGD
 from keras.layers.normalization import BatchNormalization
 import pandas as pd
 from tensorflow.python.client import device_lib
@@ -46,8 +47,10 @@ model.add(Dropout(0.5))
 
 model.add(Dense(output_units, activation='softmax'))
 
+sgd = SGD(lr=0.01, momentum=0.9, decay=0., nesterov=True)
+
 model.compile(loss='categorical_crossentropy',
-              optimizer='sgd', metrics=['accuracy'])
+              optimizer=sgd, metrics=['accuracy'])
 
 history = model.fit(X, Y, epochs=30, shuffle=True, batch_size=500,
                     validation_split=0.05, verbose=1)
