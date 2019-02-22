@@ -1,5 +1,6 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
+from keras.optimizers import Adam
 import pandas as pd
 from tensorflow.python.client import device_lib
 from dotenv import load_dotenv
@@ -15,12 +16,11 @@ X = pd.read_csv(datapath + '/train.csv')
 Y = pd.read_csv(datapath + '/train.csv', header=0, usecols=['AdoptionSpeed'])
 Y = pd.get_dummies(Y['AdoptionSpeed'], columns=['AdoptionSpeed'])
 X = X.drop(['Description', 'AdoptionSpeed', 'Name', 'PetID'], axis=1)
+
 X = pd.get_dummies(X, columns=['Type', 'Breed1', 'Breed2', 'Gender', 'Color1', 'Color2', 'Color3', 'MaturitySize',
                                'FurLength', 'Vaccinated', 'Dewormed', 'Sterilized', 'Health', 'State', 'RescuerID'])
 
-print(X)
-quit()
-X['Age'] = X['Age'].apply(lambda v: v / X['Age']).max()
+X['Age'] = X['Age'] / X['Age'].max()
 X['Quantity'] = X['Quantity'] / X['Quantity'].max()
 X['Fee'] = X['Fee'] / X['Fee'].max()
 X['VideoAmt'] = X['VideoAmt'] / X['VideoAmt'].max()
@@ -32,21 +32,23 @@ output_units = Y.shape[1]
 model = Sequential()
 model.add(Dense(input_units, input_dim=input_units, activation='relu'))
 
-model.add(Dense(input_units, activation='relu'))
-model.add(Dense(input_units, activation='relu'))
-model.add(Dense(input_units, activation='relu'))
-model.add(Dense(input_units, activation='relu'))
+model.add(Dense(input_units * 4, activation='relu'))
+model.add(Dropout(0.5))
+
+model.add(Dense(input_units * 3, activation='relu'))
+model.add(Dropout(0.5))
 
 model.add(Dense(output_units, activation='softmax'))
 
 
-model.compile(loss=kappa.kappa_loss,
-              optimizer='adam', metrics=['accuracy'])
+adam = Adam(lr=0.1, beta_1=0.9, beta_2=0.999,
+            epsilon=None, decay=0.01, amsgrad=False)
+model.compile(loss='categorical_crossentropy',
+              optimizer=adam, metrics=['accuracy'])
 
 print(model.summary())
-quit()
 
-history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=None,
+history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=500,
                     validation_split=0.05, verbose=1)
 
 scores = model.evaluate(X, Y)
