@@ -1,6 +1,5 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
-from keras.optimizers import Adam
 import pandas as pd
 from tensorflow.python.client import device_lib
 from dotenv import load_dotenv
@@ -40,11 +39,8 @@ model.add(Dropout(0.5))
 
 model.add(Dense(output_units, activation='softmax'))
 
-
-adam = Adam(lr=0.1, beta_1=0.9, beta_2=0.999,
-            epsilon=None, decay=0.01, amsgrad=False)
 model.compile(loss='categorical_crossentropy',
-              optimizer=adam, metrics=['accuracy'])
+              optimizer='adam', metrics=['accuracy'])
 
 history = model.fit(X, Y, epochs=20, shuffle=True, batch_size=100,
                     validation_split=0.05, verbose=1)
