@@ -1,5 +1,6 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
+from keras.layers.normalization import BatchNormalization
 import pandas as pd
 from tensorflow.python.client import device_lib
 from dotenv import load_dotenv
@@ -32,12 +33,15 @@ model = Sequential()
 model.add(Dense(input_units, input_dim=input_units, activation='relu'))
 
 model.add(Dense(input_units, activation='relu'))
+model.add(BatchNormalization())
 model.add(Dropout(0.5))
 
 model.add(Dense(input_units, activation='relu'))
+model.add(BatchNormalization())
 model.add(Dropout(0.5))
 
 model.add(Dense(input_units, activation='relu'))
+model.add(BatchNormalization())
 model.add(Dropout(0.5))
 
 model.add(Dense(output_units, activation='softmax'))
