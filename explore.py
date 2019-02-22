@@ -3,6 +3,7 @@ from keras.layers import Dense, Dropout
 import pandas as pd
 from tensorflow.python.client import device_lib
 from dotenv import load_dotenv
+import matplotlib.pyplot as plt
 import kappa
 import os
 import time
@@ -27,6 +28,7 @@ X['PhotoAmt'] = X['PhotoAmt'] / X['PhotoAmt'].max()
 
 input_units = X.shape[1]
 output_units = Y.shape[1]
+
 model = Sequential()
 model.add(Dense(input_units, input_dim=input_units, activation='relu'))
 
@@ -35,13 +37,32 @@ model.add(Dense(input_units, input_dim=input_units, activation='relu'))
 
 model.add(Dense(output_units, activation='softmax'))
 
-model.compile(loss='categorical_crossentropy',
+model.compile(loss=kappa.kappa_loss,
               optimizer='adam', metrics=['accuracy'])
-model.fit(X, Y, epochs=50, shuffle=True,
-          validation_split=0.05, verbose=2)
+
+history = model.fit(X, Y, epochs=1, shuffle=True, batch_size=None,
+                    validation_split=0.05, verbose=1)
 
 scores = model.evaluate(X, Y)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
-model_name = time.strftime('%Y-%m-%d-%H-%M-%S') + '.h5'
-model.save('models/' + model_name)
+model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
+model.save('models/' + model_name + '.h5')
+
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+plt.savefig('graphs/val' + model_name + '.png')
+# summarize history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+plt.savefig('graphs/acc' + model_name + '.png')

@@ -1,3 +1,6 @@
+import tensorflow as tf
+
+
 def kappa_loss(y_pred, y_true, y_pow=2, eps=1e-10, N=5, bsize=256, name='kappa'):
     """A continuous differentiable approximation of discrete kappa loss.
         Args:
