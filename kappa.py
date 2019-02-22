@@ -1,80 +1,42 @@
-import numpy as np
+import tensorflow as tf
 
 
-def confusion_matrix(rater_a, rater_b, min_rating=None, max_rating=None):
-    """
-    Returns the confusion matrix between rater's ratings
-    """
-    assert(len(rater_a) == len(rater_b))
-    if min_rating is None:
-        min_rating = min(rater_a + rater_b)
-    if max_rating is None:
-        max_rating = max(rater_a + rater_b)
-    num_ratings = int(max_rating - min_rating + 1)
-    conf_mat = [[0 for i in range(num_ratings)]
-                for j in range(num_ratings)]
-    for a, b in zip(rater_a, rater_b):
-        conf_mat[a - min_rating][b - min_rating] += 1
-    return conf_mat
+def kappa_loss(y_true, y_pred, y_pow=2, eps=1e-10, N=5, bsize=256, name='kappa'):
+    """A continuous differentiable approximation of discrete kappa loss.
+        Args:
+            y_true: 2D tensor or array,[batch_size, num_classes]
+            y_pred: 2D tensor or array, [batch_size, num_classes]
+            y_pow: int,  e.g. y_pow=2
+            N: typically num_classes of the model
+            bsize: batch_size of the training or validation ops
+            eps: a float, prevents divide by zero
+            name: Optional scope/name for op_scope.
+        Returns:
+            A tensor with the kappa loss."""
 
+    with tf.name_scope(name):
+        y_true = tf.to_float(y_true)
+        repeat_op = tf.to_float(
+            tf.tile(tf.reshape(tf.range(0, N), [N, 1]), [1, N]))
+        repeat_op_sq = tf.square((repeat_op - tf.transpose(repeat_op)))
+        weights = repeat_op_sq / tf.to_float((N - 1) ** 2)
 
-def histogram(ratings, min_rating=None, max_rating=None):
-    """
-    Returns the counts of each type of rating that a rater made
-    """
-    if min_rating is None:
-        min_rating = min(ratings)
-    if max_rating is None:
-        max_rating = max(ratings)
-    num_ratings = int(max_rating - min_rating + 1)
-    hist_ratings = [0 for x in range(num_ratings)]
-    for r in ratings:
-        hist_ratings[r - min_rating] += 1
-    return hist_ratings
+        pred_ = y_pred ** y_pow
+        try:
+            pred_norm = pred_ / \
+                (eps + tf.reshape(tf.reduce_sum(pred_, 1), [-1, 1]))
+        except Exception:
+            pred_norm = pred_ / \
+                (eps + tf.reshape(tf.reduce_sum(pred_, 1), [bsize, 1]))
 
+        hist_rater_a = tf.reduce_sum(pred_norm, 0)
+        hist_rater_b = tf.reduce_sum(y_true, 0)
 
-def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None):
-    """
-    Calculates the quadratic weighted kappa
-    quadratic_weighted_kappa calculates the quadratic weighted kappa
-    value, which is a measure of inter-rater agreement between two raters
-    that provide discrete numeric ratings.  Potential values range from -1
-    (representing complete disagreement) to 1 (representing complete
-    agreement).  A kappa value of 0 is expected if all agreement is due to
-    chance.
-    quadratic_weighted_kappa(rater_a, rater_b), where rater_a and rater_b
-    each correspond to a list of integer ratings.  These lists must have the
-    same length.
-    The ratings should be integers, and it is assumed that they contain
-    the complete range of possible ratings.
-    quadratic_weighted_kappa(X, min_rating, max_rating), where min_rating
-    is the minimum possible rating, and max_rating is the maximum possible
-    rating
-    """
-    rater_a = np.array(rater_a, dtype=int)
-    rater_b = np.array(rater_b, dtype=int)
-    assert(len(rater_a) == len(rater_b))
-    if min_rating is None:
-        min_rating = min(min(rater_a), min(rater_b))
-    if max_rating is None:
-        max_rating = max(max(rater_a), max(rater_b))
-    conf_mat = confusion_matrix(rater_a, rater_b,
-                                min_rating, max_rating)
-    num_ratings = len(conf_mat)
-    num_scored_items = float(len(rater_a))
+        conf_mat = tf.matmul(tf.transpose(pred_norm), y_true)
 
-    hist_rater_a = histogram(rater_a, min_rating, max_rating)
-    hist_rater_b = histogram(rater_b, min_rating, max_rating)
+        nom = tf.reduce_sum(weights * conf_mat)
+        denom = tf.reduce_sum(weights * tf.matmul(
+            tf.reshape(hist_rater_a, [N, 1]), tf.reshape(hist_rater_b, [1, N])) /
+            tf.to_float(bsize))
 
-    numerator = 0.0
-    denominator = 0.0
-
-    for i in range(num_ratings):
-        for j in range(num_ratings):
-            expected_count = (hist_rater_a[i] * hist_rater_b[j]
-                              / num_scored_items)
-            d = pow(i - j, 2.0) / pow(num_ratings - 1, 2.0)
-            numerator += d * conf_mat[i][j] / num_scored_items
-            denominator += d * expected_count / num_scored_items
-
-    return 1.0 - numerator / denominator
+        return 1 - nom / (denom + eps)

@@ -36,28 +36,28 @@ output_units = Y.shape[1]
 model = Sequential()
 model.add(Dense(input_units, input_dim=input_units, activation='relu'))
 
-model.add(Dense(input_units * 2, activation='relu'))
-model.add(BatchNormalization())
-model.add(Dropout(0.5))
+# model.add(Dense(input_units * 2, activation='relu'))
+# model.add(BatchNormalization())
+# model.add(Dropout(0.5))
 
-model.add(Dense(input_units, activation='relu'))
-model.add(BatchNormalization())
-model.add(Dropout(0.5))
+# model.add(Dense(input_units, activation='relu'))
+# model.add(BatchNormalization())
+# model.add(Dropout(0.5))
 
-model.add(Dense(input_units, activation='relu'))
-model.add(BatchNormalization())
-model.add(Dropout(0.5))
+# model.add(Dense(input_units, activation='relu'))
+# model.add(BatchNormalization())
+# model.add(Dropout(0.5))
 
-model.add(Dense(input_units, activation='relu'))
-model.add(BatchNormalization())
-model.add(Dropout(0.5))
+# model.add(Dense(input_units, activation='relu'))
+# model.add(BatchNormalization())
+# model.add(Dropout(0.5))
 
 model.add(Dense(output_units, activation='softmax'))
 
 adam = Adam(lr=0.01)
 model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
 
-model.compile(loss=kappa.quadratic_weighted_kappa,
+model.compile(loss=kappa.quadratic_kappa,
               optimizer=adam, metrics=['accuracy'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
