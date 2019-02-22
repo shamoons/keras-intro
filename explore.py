@@ -41,7 +41,8 @@ columns_to_normalize = ['DescriptionLength', 'Age',
                         'Quantity', 'Fee', 'VideoAmt', 'PhotoAmt']
 
 for column in columns_to_normalize:
-    X[column] = (X[column] - X[column].mean())/X[column].std()
+    # X[column] = (X[column] - X[column].mean())/X[column].std()
+    X[column] = X[column] / X[column].max()
 
 # X = shuffle(X)
 
