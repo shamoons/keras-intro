@@ -57,7 +57,7 @@ model.add(Dense(output_units, activation='softmax'))
 adam = Adam(lr=0.01)
 model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
 
-model.compile(loss=kappa.kappa_loss,
+model.compile(loss=kappa.quadratic_weighted_kappa,
               optimizer=adam, metrics=['accuracy'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
