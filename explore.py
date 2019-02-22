@@ -30,14 +30,14 @@ output_units = Y.shape[1]
 model = Sequential()
 model.add(Dense(input_units, input_dim=input_units, activation='relu'))
 
-model.add(Dense(input_units, activation='relu'))
-model.add(Dense(input_units, activation='relu'))
+# model.add(Dense(input_units, activation='relu'))
+# model.add(Dense(input_units, activation='relu'))
 
 model.add(Dense(output_units, activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',
               optimizer='adam', metrics=['accuracy'])
-model.fit(X, Y, epochs=1, batch_size=100, shuffle=True,
+model.fit(X, Y, epochs=50, shuffle=True,
           validation_split=0.05, verbose=2)
 
 scores = model.evaluate(X, Y)
