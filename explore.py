@@ -58,7 +58,6 @@ for column in columns_to_normalize:
     X[column] = (X[column] - X[column].mean())/X[column].std()
 
 X = shuffle(X)
-# print(X)
 
 input_units = X.shape[1]
 output_units = Y.shape[1]
@@ -87,7 +86,7 @@ model.add(Dense(output_units, activation='softmax'))
 adam = Adam(lr=0.1, decay=0.0001)
 model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
 
-model.compile(loss=kappa.kappa_loss,
+model.compile(loss='categorical_crossentropy',
               optimizer=adam, metrics=['accuracy'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
