@@ -9,8 +9,6 @@ import os
 import time
 load_dotenv()
 
-print(device_lib.list_local_devices())
-
 datapath = os.environ['DATA_PATH']
 
 X = pd.read_csv(datapath + '/train.csv')
@@ -32,13 +30,19 @@ output_units = Y.shape[1]
 model = Sequential()
 model.add(Dense(input_units, input_dim=input_units, activation='relu'))
 
-# model.add(Dense(input_units, activation='relu'))
-# model.add(Dense(input_units, activation='relu'))
+model.add(Dense(input_units, activation='relu'))
+model.add(Dense(input_units, activation='relu'))
+model.add(Dense(input_units, activation='relu'))
+model.add(Dense(input_units, activation='relu'))
 
 model.add(Dense(output_units, activation='softmax'))
 
+
 model.compile(loss=kappa.kappa_loss,
               optimizer='adam', metrics=['accuracy'])
+
+print(model.summary())
+quit()
 
 history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=None,
                     validation_split=0.05, verbose=1)

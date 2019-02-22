@@ -1,11 +1,11 @@
 import tensorflow as tf
 
 
-def kappa_loss(y_pred, y_true, y_pow=2, eps=1e-10, N=5, bsize=256, name='kappa'):
+def kappa_loss(y_true, y_pred, y_pow=2, eps=1e-10, N=5, bsize=256, name='kappa'):
     """A continuous differentiable approximation of discrete kappa loss.
         Args:
-            y_pred: 2D tensor or array, [batch_size, num_classes]
             y_true: 2D tensor or array,[batch_size, num_classes]
+            y_pred: 2D tensor or array, [batch_size, num_classes]
             y_pow: int,  e.g. y_pow=2
             N: typically num_classes of the model
             bsize: batch_size of the training or validation ops
