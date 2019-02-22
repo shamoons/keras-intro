@@ -46,8 +46,6 @@ adam = Adam(lr=0.1, beta_1=0.9, beta_2=0.999,
 model.compile(loss='categorical_crossentropy',
               optimizer=adam, metrics=['accuracy'])
 
-print(model.summary())
-
 history = model.fit(X, Y, epochs=20, shuffle=True, batch_size=100,
                     validation_split=0.05, verbose=1)
 
