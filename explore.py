@@ -76,11 +76,11 @@ model.add(Dense(output_units, activation='softmax'))
 adam = Adam(lr=0.1, decay=0.0001)
 model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
 
-model.compile(loss='categorical_crossentropy',
+model.compile(loss=kappa.kappa_loss,
               optimizer=adam, metrics=['accuracy'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
-history = model.fit(X, Y, epochs=250, shuffle=True, batch_size=1000,
+history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=1000,
                     validation_split=0.05, verbose=1, callbacks=[csvLogger])
 
 scores = model.evaluate(X, Y)
@@ -95,8 +95,6 @@ plt.title('model acc')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train_acc', 'test_acc'], loc='upper left')
-# plt.show()
-# plt.savefig('graphs/val' + model_name + '.png')
 
 # summarize history for loss
 plt.subplot(122)
