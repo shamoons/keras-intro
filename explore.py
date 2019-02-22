@@ -6,6 +6,7 @@ from keras.layers.normalization import BatchNormalization
 import pandas as pd
 from tensorflow.python.client import device_lib
 from dotenv import load_dotenv
+from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
 import kappa
 import os
@@ -27,6 +28,7 @@ X['Quantity'] = X['Quantity'] / X['Quantity'].max()
 X['Fee'] = X['Fee'] / X['Fee'].max()
 X['VideoAmt'] = X['VideoAmt'] / X['VideoAmt'].max()
 X['PhotoAmt'] = X['PhotoAmt'] / X['PhotoAmt'].max()
+X = shuffle(X)
 
 input_units = X.shape[1]
 output_units = Y.shape[1]
