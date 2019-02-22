@@ -27,15 +27,27 @@ X['DescriptionLength'] = X['Description'].str.len()
 
 
 # Time to get some sentiment!
-for petid in X['PetID']:
+for ind, row in X.iterrows():
+    petid = row['PetID']
     sentiment_file = datapath + '/train_sentiment/' + petid + '.json'
     if os.path.isfile(sentiment_file):
         json_data = json.loads(open(sentiment_file).read())
-        X['DescriptionMagnitude'] = json_data['documentSentiment']['magnitude']
-        X['DescriptionScore'] = json_data['documentSentiment']['score']
+
+        X.loc[ind, 'DescriptionMagnitude'] = json_data['documentSentiment']['magnitude']
+        X.loc[ind, 'DescriptionScore'] = json_data['documentSentiment']['score']
     else:
-        X['DescriptionMagnitude'] = 0
-        X['DescriptionScore'] = 0
+        X.loc[ind, 'DescriptionMagnitude'] = 0
+        X.loc[ind, 'DescriptionScore'] = 0
+
+# for petid in X['PetID']:
+#     sentiment_file = datapath + '/train_sentiment/' + petid + '.json'
+#     if os.path.isfile(sentiment_file):
+#         json_data = json.loads(open(sentiment_file).read())
+#         X['DescriptionMagnitude'] = json_data['documentSentiment']['magnitude']
+#         X['DescriptionScore'] = json_data['documentSentiment']['score']
+#     else:
+#         X['DescriptionMagnitude'] = 0
+#         X['DescriptionScore'] = 0
 
 X = X.drop(['Description', 'AdoptionSpeed', 'Name', 'PetID'], axis=1)
 
