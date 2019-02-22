@@ -55,7 +55,7 @@ model.compile(loss=kappa.kappa_loss,
               optimizer=adam, metrics=['accuracy'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
-history = model.fit(X, Y, epochs=50, shuffle=True, batch_size=1000,
+history = model.fit(X, Y, epochs=200, shuffle=True, batch_size=1000,
                     validation_split=0.05, verbose=1, callbacks=[csvLogger])
 
 scores = model.evaluate(X, Y)
