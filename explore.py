@@ -31,10 +31,10 @@ output_units = Y.shape[1]
 model = Sequential()
 model.add(Dense(input_units, input_dim=input_units, activation='relu'))
 
-model.add(Dense(input_units * 4, activation='relu'))
+model.add(Dense(input_units, activation='relu'))
 model.add(Dropout(0.5))
 
-model.add(Dense(input_units * 3, activation='relu'))
+model.add(Dense(input_units, activation='relu'))
 model.add(Dropout(0.5))
 
 model.add(Dense(output_units, activation='softmax'))
