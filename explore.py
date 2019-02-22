@@ -1,6 +1,7 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import SGD
+from keras.callbacks import CSVLogger
 from keras.layers.normalization import BatchNormalization
 import pandas as pd
 from tensorflow.python.client import device_lib
@@ -48,17 +49,19 @@ model.add(Dropout(0.5))
 model.add(Dense(output_units, activation='softmax'))
 
 sgd = SGD(lr=0.01, momentum=0.9, decay=0., nesterov=True)
+model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
 
 model.compile(loss=kappa.kappa_loss,
               optimizer=sgd, metrics=['accuracy'])
 
-history = model.fit(X, Y, epochs=50, shuffle=True, batch_size=500,
-                    validation_split=0.05, verbose=1)
+csvLogger = CSVLogger('data/' + model_name + '.csv')
+history = model.fit(X, Y, epochs=50, shuffle=True, batch_size=1000,
+                    validation_split=0.05, verbose=1, callbacks=[csvLogger])
 
 scores = model.evaluate(X, Y)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
-model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
+
 model.save('models/' + model_name + '.h5')
 
 plt.subplot(121)
@@ -67,7 +70,7 @@ plt.plot(history.history['val_acc'])
 plt.title('model acc')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
-# plt.legend(['train_acc', 'test_acc'], loc='upper left')
+plt.legend(['train_acc', 'test_acc'], loc='upper left')
 # plt.show()
 # plt.savefig('graphs/val' + model_name + '.png')
 
@@ -78,7 +81,6 @@ plt.plot(history.history['val_loss'])
 plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
-plt.legend(['train_acc', 'test_acc', 'train_loss',
-            'test_loss'], loc='upper left')
+plt.legend(['train_loss', 'test_loss'], loc='upper left')
 plt.show()
 plt.savefig('graphs/' + model_name + '.png')
