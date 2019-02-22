@@ -46,7 +46,7 @@ columns_to_normalize = ['DescriptionLength', 'Age',
 for column in columns_to_normalize:
     X[column] = (X[column] - X[column].mean())/X[column].std()
 
-X = shuffle(X)
+# X = shuffle(X)
 
 input_units = X.shape[1]
 output_units = Y.shape[1]
@@ -78,7 +78,7 @@ model.compile(loss=kappa.kappa_loss,
               optimizer='adam', metrics=['accuracy'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
-history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=1000,
+history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=1500,
                     validation_split=0.05, verbose=1, callbacks=[csvLogger])
 
 scores = model.evaluate(X, Y)
