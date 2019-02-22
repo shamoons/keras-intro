@@ -3,8 +3,6 @@ from keras.callbacks import CSVLogger
 from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.models import Sequential
-from sklearn.utils import shuffle
-from tensorflow.python.client import device_lib
 import json
 import kappa
 import matplotlib.pyplot as plt
@@ -16,9 +14,8 @@ load_dotenv()
 datapath = os.environ['DATA_PATH']
 
 X = pd.read_csv(datapath + '/train.csv')
-Y = pd.read_csv(datapath + '/train.csv', header=0, usecols=['AdoptionSpeed'])
+Y = pd.read_csv(datapath + '/train.csv', usecols=['AdoptionSpeed'])
 Y = pd.get_dummies(Y['AdoptionSpeed'], columns=['AdoptionSpeed'])
-
 X = pd.get_dummies(X, columns=['Type', 'Breed1', 'Breed2', 'Gender', 'Color1', 'Color2', 'Color3', 'MaturitySize',
                                'FurLength', 'Vaccinated', 'Dewormed', 'Sterilized', 'Health', 'State', 'RescuerID'])
 
@@ -56,23 +53,23 @@ model.add(Dense(input_units, input_dim=input_units, activation='relu'))
 
 model.add(Dense(input_units * 2, activation='relu'))
 model.add(BatchNormalization())
-model.add(Dropout(0.5))
+# model.add(Dropout(0.5))
 
 model.add(Dense(input_units, activation='relu'))
 model.add(BatchNormalization())
-model.add(Dropout(0.5))
+# model.add(Dropout(0.5))
 
 model.add(Dense(input_units, activation='relu'))
 model.add(BatchNormalization())
-model.add(Dropout(0.5))
+# model.add(Dropout(0.5))
 
 model.add(Dense(input_units, activation='relu'))
 model.add(BatchNormalization())
-model.add(Dropout(0.5))
+# model.add(Dropout(0.5))
 
 model.add(Dense(input_units, activation='relu'))
 model.add(BatchNormalization())
-model.add(Dropout(0.5))
+# model.add(Dropout(0.5))
 
 model.add(Dense(output_units, activation='softmax'))
 
