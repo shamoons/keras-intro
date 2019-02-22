@@ -1,6 +1,6 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
-from keras.optimizers import SGD
+from keras.optimizers import Adam
 from keras.callbacks import CSVLogger
 from keras.layers.normalization import BatchNormalization
 import pandas as pd
@@ -48,11 +48,11 @@ model.add(Dropout(0.5))
 
 model.add(Dense(output_units, activation='softmax'))
 
-sgd = SGD(lr=0.01, momentum=0.9, decay=0., nesterov=True)
+adam = Adam(lr=0.01)
 model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
 
 model.compile(loss=kappa.kappa_loss,
-              optimizer=sgd, metrics=['accuracy'])
+              optimizer=adam, metrics=['accuracy'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
 history = model.fit(X, Y, epochs=50, shuffle=True, batch_size=1000,
