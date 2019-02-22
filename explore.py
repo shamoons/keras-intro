@@ -37,12 +37,15 @@ model.add(Dropout(0.5))
 model.add(Dense(input_units, activation='relu'))
 model.add(Dropout(0.5))
 
+model.add(Dense(input_units, activation='relu'))
+model.add(Dropout(0.5))
+
 model.add(Dense(output_units, activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',
               optimizer='adam', metrics=['accuracy'])
 
-history = model.fit(X, Y, epochs=20, shuffle=True, batch_size=100,
+history = model.fit(X, Y, epochs=20, shuffle=True, batch_size=500,
                     validation_split=0.05, verbose=1)
 
 scores = model.evaluate(X, Y)
