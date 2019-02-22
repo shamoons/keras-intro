@@ -40,7 +40,7 @@ model.add(Dense(output_units, activation='softmax'))
 model.compile(loss=kappa.kappa_loss,
               optimizer='adam', metrics=['accuracy'])
 
-history = model.fit(X, Y, epochs=1, shuffle=True, batch_size=None,
+history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=None,
                     validation_split=0.05, verbose=1)
 
 scores = model.evaluate(X, Y)

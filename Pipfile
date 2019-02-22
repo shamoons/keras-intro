@@ -11,6 +11,7 @@ keras = "*"
 numpy = "*"
 tensorflow = "*"
 python-dotenv = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.6"
