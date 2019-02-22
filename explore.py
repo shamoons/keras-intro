@@ -37,8 +37,8 @@ for ind, row in X.iterrows():
 
 X = X.drop(['Description', 'AdoptionSpeed', 'Name', 'PetID'], axis=1)
 
-columns_to_normalize = ['DescriptionLength', 'Age',
-                        'Quantity', 'Fee', 'VideoAmt', 'PhotoAmt']
+columns_to_normalize = ['DescriptionLength', 'Age', 'Quantity', 'Fee',
+                        'VideoAmt', 'PhotoAmt', 'DescriptionMagnitude', 'DescriptionScore']
 
 for column in columns_to_normalize:
     # X[column] = (X[column] - X[column].mean())/X[column].std()
