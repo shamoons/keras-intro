@@ -39,4 +39,4 @@ def kappa_loss(y_true, y_pred, y_pow=2, eps=1e-10, N=5, bsize=256, name='kappa')
             tf.reshape(hist_rater_a, [N, 1]), tf.reshape(hist_rater_b, [1, N])) /
             tf.to_float(bsize))
 
-        return 1 - nom / (denom + eps)
+        return 1 - (nom / (denom + eps))
