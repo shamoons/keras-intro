@@ -39,16 +39,6 @@ for ind, row in X.iterrows():
         X.loc[ind, 'DescriptionMagnitude'] = 0
         X.loc[ind, 'DescriptionScore'] = 0
 
-# for petid in X['PetID']:
-#     sentiment_file = datapath + '/train_sentiment/' + petid + '.json'
-#     if os.path.isfile(sentiment_file):
-#         json_data = json.loads(open(sentiment_file).read())
-#         X['DescriptionMagnitude'] = json_data['documentSentiment']['magnitude']
-#         X['DescriptionScore'] = json_data['documentSentiment']['score']
-#     else:
-#         X['DescriptionMagnitude'] = 0
-#         X['DescriptionScore'] = 0
-
 X = X.drop(['Description', 'AdoptionSpeed', 'Name', 'PetID'], axis=1)
 
 columns_to_normalize = ['DescriptionLength', 'Age',
@@ -69,7 +59,7 @@ model.add(Dense(input_units * 2, activation='relu'))
 model.add(BatchNormalization())
 model.add(Dropout(0.5))
 
-model.add(Dense(input_units * 2, activation='relu'))
+model.add(Dense(input_units, activation='relu'))
 model.add(BatchNormalization())
 model.add(Dropout(0.5))
 
