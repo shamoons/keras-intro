@@ -18,6 +18,8 @@ X = X.drop(['Description', 'AdoptionSpeed', 'Name', 'PetID'], axis=1)
 X = pd.get_dummies(X, columns=['Type', 'Breed1', 'Breed2', 'Gender', 'Color1', 'Color2', 'Color3', 'MaturitySize',
                                'FurLength', 'Vaccinated', 'Dewormed', 'Sterilized', 'Health', 'State', 'RescuerID'])
 
+print(X)
+quit()
 X['Age'] = X['Age'].apply(lambda v: v / X['Age']).max()
 X['Quantity'] = X['Quantity'] / X['Quantity'].max()
 X['Fee'] = X['Fee'] / X['Fee'].max()
