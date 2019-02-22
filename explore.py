@@ -70,6 +70,10 @@ model.add(Dense(input_units, activation='relu'))
 model.add(BatchNormalization())
 model.add(Dropout(0.5))
 
+model.add(Dense(input_units, activation='relu'))
+model.add(BatchNormalization())
+model.add(Dropout(0.5))
+
 model.add(Dense(output_units, activation='softmax'))
 
 model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
