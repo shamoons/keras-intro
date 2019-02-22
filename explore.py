@@ -3,7 +3,6 @@ from keras.callbacks import CSVLogger
 from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.models import Sequential
-from keras.optimizers import Adam
 from sklearn.utils import shuffle
 from tensorflow.python.client import device_lib
 import json
@@ -73,11 +72,10 @@ model.add(Dropout(0.5))
 
 model.add(Dense(output_units, activation='softmax'))
 
-adam = Adam(lr=0.1, decay=0.0001)
 model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
 
 model.compile(loss=kappa.kappa_loss,
-              optimizer=adam, metrics=['accuracy'])
+              optimizer='adam', metrics=['accuracy'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
 history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=1000,
