@@ -3,11 +3,13 @@ from keras.callbacks import CSVLogger
 from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.models import Sequential
+from sklearn.utils.class_weight import compute_class_weight
 import json
 import kappa
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
+import numpy as np
 import time
 load_dotenv()
 
@@ -26,7 +28,7 @@ X['DescriptionLength'] = X['Description'].str.len()
 for ind, row in X.iterrows():
     petid = row['PetID']
     sentiment_file = datapath + '/train_sentiment/' + petid + '.json'
-    if os.path.isfile(sentiment_file):
+    if False and os.path.isfile(sentiment_file):
         json_data = json.loads(open(sentiment_file).read())
 
         X.loc[ind, 'DescriptionMagnitude'] = json_data['documentSentiment']['magnitude']
@@ -46,8 +48,17 @@ for column in columns_to_normalize:
 
 # X = shuffle(X)
 
+print(Y)
+print(Y.shape)
+print(np.unique(Y.columns))
+
 input_units = X.shape[1]
 output_units = Y.shape[1]
+class_weights = compute_class_weight('balanced',
+                                     np.unique(Y.columns),
+                                     Y)
+print(class_weights)
+quit()
 
 model = Sequential()
 model.add(Dense(input_units, input_dim=input_units, activation='relu'))
