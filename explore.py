@@ -17,12 +17,22 @@ datapath = os.environ['DATA_PATH']
 
 X = pd.read_csv(datapath + '/train.csv')
 Y = pd.read_csv(datapath + '/train.csv', usecols=['AdoptionSpeed'])
-Y = pd.get_dummies(Y['AdoptionSpeed'], columns=['AdoptionSpeed'])
+Y = pd.get_dummies(Y, columns=['AdoptionSpeed'])
 X = pd.get_dummies(X, columns=['Type', 'Breed1', 'Breed2', 'Gender', 'Color1', 'Color2', 'Color3', 'MaturitySize',
                                'FurLength', 'Vaccinated', 'Dewormed', 'Sterilized', 'Health', 'State', 'RescuerID'])
 
 X['DescriptionLength'] = X['Description'].str.len()
 
+# Y_integers = np.argmax(Y, axis=1)
+print(Y[Y.columns[0]])
+quit()
+
+class_weights = compute_class_weight(
+    'balanced',
+    Y.columns,
+    Y['AdoptionSpeed'])
+print(class_weights)
+quit()
 
 # Time to get some sentiment!
 for ind, row in X.iterrows():
@@ -46,19 +56,9 @@ for column in columns_to_normalize:
     # X[column] = (X[column] - X[column].mean())/X[column].std()
     X[column] = X[column] / X[column].max()
 
-# X = shuffle(X)
-
-print(Y)
-print(Y.shape)
-print(np.unique(Y.columns))
-
 input_units = X.shape[1]
 output_units = Y.shape[1]
-class_weights = compute_class_weight('balanced',
-                                     np.unique(Y.columns),
-                                     Y)
-print(class_weights)
-quit()
+
 
 model = Sequential()
 model.add(Dense(input_units, input_dim=input_units, activation='relu'))
