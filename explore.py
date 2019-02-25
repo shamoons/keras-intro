@@ -17,22 +17,24 @@ datapath = os.environ['DATA_PATH']
 
 X = pd.read_csv(datapath + '/train.csv')
 Y = pd.read_csv(datapath + '/train.csv', usecols=['AdoptionSpeed'])
-Y = pd.get_dummies(Y, columns=['AdoptionSpeed'])
+Y = pd.get_dummies(Y['AdoptionSpeed'], columns=['AdoptionSpeed'])
 X = pd.get_dummies(X, columns=['Type', 'Breed1', 'Breed2', 'Gender', 'Color1', 'Color2', 'Color3', 'MaturitySize',
                                'FurLength', 'Vaccinated', 'Dewormed', 'Sterilized', 'Health', 'State', 'RescuerID'])
 
 X['DescriptionLength'] = X['Description'].str.len()
 
-# Y_integers = np.argmax(Y, axis=1)
-print(Y[Y.columns[0]])
-quit()
-
-class_weights = compute_class_weight(
-    'balanced',
-    Y.columns,
-    Y['AdoptionSpeed'])
-print(class_weights)
-quit()
+# print(Y['AdoptionSpeed_0'].value_counts()[1])
+# print(Y['AdoptionSpeed_1'].value_counts()[1])
+# print(Y['AdoptionSpeed_2'].value_counts()[1])
+# print(Y['AdoptionSpeed_3'].value_counts()[1])
+# # print(Y['AdoptionSpeed_4'].value_counts()[1])
+# print(np.unique(Y))
+# print(Y.stack())
+class_weights = compute_class_weight('balanced',
+                                     np.unique(Y),
+                                     Y.stack())
+# print(class_weights)
+# quit()
 
 # Time to get some sentiment!
 for ind, row in X.iterrows():
@@ -91,7 +93,7 @@ model.compile(loss=kappa.kappa_loss,
               optimizer='adam', metrics=['accuracy'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
-history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=1500,
+history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=1500, class_weight=class_weights,
                     validation_split=0.05, verbose=1, callbacks=[csvLogger])
 
 scores = model.evaluate(X, Y)
