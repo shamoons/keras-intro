@@ -1,9 +1,12 @@
+from sklearn.metrics import roc_auc_score
 from dotenv import load_dotenv
 from keras.callbacks import CSVLogger
 from keras.layers import Dense, Dropout
 from keras.layers.normalization import BatchNormalization
 from keras.models import Sequential
 from sklearn.utils.class_weight import compute_class_weight
+from keras.layers.advanced_activations import LeakyReLU
+import tensorflow as tf
 import json
 import kappa
 import matplotlib.pyplot as plt
@@ -17,30 +20,28 @@ datapath = os.environ['DATA_PATH']
 
 X = pd.read_csv(datapath + '/train.csv')
 Y = pd.read_csv(datapath + '/train.csv', usecols=['AdoptionSpeed'])
-Y = pd.get_dummies(Y['AdoptionSpeed'], columns=['AdoptionSpeed'])
+# Y = pd.get_dummies(Y['AdoptionSpeed'], columns=['AdoptionSpeed'])
 X = pd.get_dummies(X, columns=['Type', 'Breed1', 'Breed2', 'Gender', 'Color1', 'Color2', 'Color3', 'MaturitySize',
                                'FurLength', 'Vaccinated', 'Dewormed', 'Sterilized', 'Health', 'State', 'RescuerID'])
 
-X['DescriptionLength'] = X['Description'].str.len()
 
-# print(Y['AdoptionSpeed_0'].value_counts()[1])
-# print(Y['AdoptionSpeed_1'].value_counts()[1])
-# print(Y['AdoptionSpeed_2'].value_counts()[1])
-# print(Y['AdoptionSpeed_3'].value_counts()[1])
-# # print(Y['AdoptionSpeed_4'].value_counts()[1])
-# print(np.unique(Y))
-# print(Y.stack())
-class_weights = compute_class_weight('balanced',
-                                     np.unique(Y),
-                                     Y.stack())
-# print(class_weights)
-# quit()
+# X['Description'] = X['Description'].fillna(" ", inplace=True)
+# X['DescriptionLength'] = X['Description'].str.len()
+
+# class_weights = compute_class_weight('balanced',
+#                                      np.unique(Y),
+#                                      Y.stack())
+
+
+# def auroc(y_true, y_pred):
+#     return tf.py_func(roc_auc_score, (y_true, y_pred), tf.double)
+
 
 # Time to get some sentiment!
 for ind, row in X.iterrows():
     petid = row['PetID']
     sentiment_file = datapath + '/train_sentiment/' + petid + '.json'
-    if False and os.path.isfile(sentiment_file):
+    if os.path.isfile(sentiment_file):
         json_data = json.loads(open(sentiment_file).read())
 
         X.loc[ind, 'DescriptionMagnitude'] = json_data['documentSentiment']['magnitude']
@@ -49,51 +50,59 @@ for ind, row in X.iterrows():
         X.loc[ind, 'DescriptionMagnitude'] = 0
         X.loc[ind, 'DescriptionScore'] = 0
 
+# X = X.drop(['AdoptionSpeed', 'Name'], axis=1)
 X = X.drop(['Description', 'AdoptionSpeed', 'Name', 'PetID'], axis=1)
 
-columns_to_normalize = ['DescriptionLength', 'Age', 'Quantity', 'Fee',
+columns_to_normalize = ['Age', 'Quantity', 'Fee',
                         'VideoAmt', 'PhotoAmt', 'DescriptionMagnitude', 'DescriptionScore']
 
 for column in columns_to_normalize:
-    # X[column] = (X[column] - X[column].mean())/X[column].std()
-    X[column] = X[column] / X[column].max()
+    X[column] = (X[column] - X[column].mean()) / X[column].std()
+    # X[column] = X[column] / X[column].max()
+
+Y = (Y - Y.mean()) / Y.std()
+
 
 input_units = X.shape[1]
 output_units = Y.shape[1]
 
+print(X.isnull().any())
+print(Y.isnull().any())
+
 
 model = Sequential()
 model.add(Dense(input_units, input_dim=input_units, activation='relu'))
+# model.add(BatchNormalization())
+# model.add(Dropout(0.5))
 
 model.add(Dense(input_units * 2, activation='relu'))
-model.add(BatchNormalization())
-# model.add(Dropout(0.5))
+model.add(Dropout(0.5))
 
 model.add(Dense(input_units, activation='relu'))
 model.add(BatchNormalization())
-# model.add(Dropout(0.5))
+# # model.add(Dropout(0.5))
 
 model.add(Dense(input_units, activation='relu'))
 model.add(BatchNormalization())
-# model.add(Dropout(0.5))
+# # model.add(Dropout(0.5))
 
 model.add(Dense(input_units, activation='relu'))
 model.add(BatchNormalization())
-# model.add(Dropout(0.5))
+# # model.add(Dropout(0.5))
 
 model.add(Dense(input_units, activation='relu'))
 model.add(BatchNormalization())
-# model.add(Dropout(0.5))
+# # model.add(Dropout(0.5))
 
-model.add(Dense(output_units, activation='softmax'))
+model.add(Dense(output_units))
+model.add(LeakyReLU(alpha=0.1))
 
 model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
 
-model.compile(loss=kappa.kappa_loss,
-              optimizer='adam', metrics=['accuracy'])
+model.compile(loss='mse', optimizer='adam', metrics=['mse', 'mae'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
-history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=1500, class_weight=class_weights,
+history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=128,
                     validation_split=0.05, verbose=1, callbacks=[csvLogger])
 
 scores = model.evaluate(X, Y)
