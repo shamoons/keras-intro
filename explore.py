@@ -1,130 +1,70 @@
-from sklearn.metrics import roc_auc_score
+import keras
 from dotenv import load_dotenv
-from keras.callbacks import CSVLogger
-from keras.layers import Dense, Dropout
-from keras.layers.normalization import BatchNormalization
-from keras.models import Sequential
+
+from keras.callbacks import ModelCheckpoint, CSVLogger
+
 from sklearn.utils.class_weight import compute_class_weight
-from keras.layers.advanced_activations import LeakyReLU
-import tensorflow as tf
-import json
 import kappa
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
-import numpy as np
+import pets
+import tensorflow as tf
 import time
+import numpy as np
 load_dotenv()
 
 datapath = os.environ['DATA_PATH']
 
-X = pd.read_csv(datapath + '/train.csv')
+X = pets.load_input(datapath + '/train.csv', datapath +
+                    '/train_sentiment/', keepPetId=False)
 Y = pd.read_csv(datapath + '/train.csv', usecols=['AdoptionSpeed'])
-# Y = pd.get_dummies(Y['AdoptionSpeed'], columns=['AdoptionSpeed'])
-X = pd.get_dummies(X, columns=['Type', 'Breed1', 'Breed2', 'Gender', 'Color1', 'Color2', 'Color3', 'MaturitySize',
-                               'FurLength', 'Vaccinated', 'Dewormed', 'Sterilized', 'Health', 'State', 'RescuerID'])
 
+Y = pets.normalize_output(Y)
 
-# X['Description'] = X['Description'].fillna(" ", inplace=True)
-# X['DescriptionLength'] = X['Description'].str.len()
-
-# class_weights = compute_class_weight('balanced',
-#                                      np.unique(Y),
-#                                      Y.stack())
-
-
-# def auroc(y_true, y_pred):
-#     return tf.py_func(roc_auc_score, (y_true, y_pred), tf.double)
-
-
-# Time to get some sentiment!
-for ind, row in X.iterrows():
-    petid = row['PetID']
-    sentiment_file = datapath + '/train_sentiment/' + petid + '.json'
-    if os.path.isfile(sentiment_file):
-        json_data = json.loads(open(sentiment_file).read())
-
-        X.loc[ind, 'DescriptionMagnitude'] = json_data['documentSentiment']['magnitude']
-        X.loc[ind, 'DescriptionScore'] = json_data['documentSentiment']['score']
-    else:
-        X.loc[ind, 'DescriptionMagnitude'] = 0
-        X.loc[ind, 'DescriptionScore'] = 0
-
-# X = X.drop(['AdoptionSpeed', 'Name'], axis=1)
-X = X.drop(['Description', 'AdoptionSpeed', 'Name', 'PetID'], axis=1)
-
-columns_to_normalize = ['Age', 'Quantity', 'Fee',
-                        'VideoAmt', 'PhotoAmt', 'DescriptionMagnitude', 'DescriptionScore']
-
-for column in columns_to_normalize:
-    X[column] = (X[column] - X[column].mean()) / X[column].std()
-    # X[column] = X[column] / X[column].max()
-
-Y = (Y - Y.mean()) / Y.std()
+# def weighted_crossentropy(labels, logits):
+#     return tf.losses.softmax_cross_entropy(
+#         labels,
+#         logits,
+#         weights=tf.abs(tf.argmax(logits, axis=1) - tf.argmax(labels, axis=1)),
+#     )
 
 
 input_units = X.shape[1]
-output_units = Y.shape[1]
 
-print(X.isnull().any())
-print(Y.isnull().any())
-
-
-model = Sequential()
-model.add(Dense(input_units, input_dim=input_units, activation='relu'))
-# model.add(BatchNormalization())
-# model.add(Dropout(0.5))
-
-model.add(Dense(input_units * 2, activation='relu'))
-model.add(Dropout(0.5))
-
-model.add(Dense(input_units, activation='relu'))
-model.add(BatchNormalization())
-# # model.add(Dropout(0.5))
-
-model.add(Dense(input_units, activation='relu'))
-model.add(BatchNormalization())
-# # model.add(Dropout(0.5))
-
-model.add(Dense(input_units, activation='relu'))
-model.add(BatchNormalization())
-# # model.add(Dropout(0.5))
-
-model.add(Dense(input_units, activation='relu'))
-model.add(BatchNormalization())
-# # model.add(Dropout(0.5))
-
-model.add(Dense(output_units))
-model.add(LeakyReLU(alpha=0.1))
+model = pets.get_model(input_size=input_units)
 
 model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
 
-model.compile(loss='mse', optimizer='adam', metrics=['mse', 'mae'])
+model.compile(loss='mean_squared_error',
+              optimizer='adam', metrics=['mean_squared_error', 'accuracy'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
-history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=128,
-                    validation_split=0.05, verbose=1, callbacks=[csvLogger])
+checkpoint = ModelCheckpoint('models/' + model_name + '.h5',
+                             monitor='val_mean_squared_error:', verbose=1, save_best_only=True, save_weights_only=True, mode='auto')
+
+callbacks = [csvLogger, checkpoint]
+history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=512,
+                    validation_split=0.05, verbose=1, callbacks=callbacks)
 
 scores = model.evaluate(X, Y)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
-model.save('models/' + model_name + '.h5')
+# plt.subplot(121)
+# plt.plot(history.history['acc'])
+# plt.plot(history.history['val_acc'])
+# plt.title('model acc')
+# plt.ylabel('accuracy')
+# plt.xlabel('epoch')
+# plt.legend(['train_acc', 'test_acc'], loc='upper left')
 
-plt.subplot(121)
-plt.plot(history.history['acc'])
-plt.plot(history.history['val_acc'])
-plt.title('model acc')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train_acc', 'test_acc'], loc='upper left')
-
-# summarize history for loss
-plt.subplot(122)
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train_loss', 'test_loss'], loc='upper left')
-plt.show()
-plt.savefig('graphs/' + model_name + '.png')
+# # summarize history for loss
+# plt.subplot(122)
+# plt.plot(history.history['loss'])
+# plt.plot(history.history['val_loss'])
+# plt.title('model loss')
+# plt.ylabel('loss')
+# plt.xlabel('epoch')
+# plt.legend(['train_loss', 'test_loss'], loc='upper left')
+# plt.show()
+# plt.savefig('graphs/' + model_name + '.png')
