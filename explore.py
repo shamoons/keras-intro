@@ -1,8 +1,7 @@
 import keras
 from dotenv import load_dotenv
-
 from keras.callbacks import ModelCheckpoint, CSVLogger
-
+from keras.utils.np_utils import to_categorical
 from sklearn.utils.class_weight import compute_class_weight
 import kappa
 import matplotlib.pyplot as plt
@@ -20,14 +19,8 @@ X = pets.load_input(datapath + '/train.csv', datapath +
                     '/train_sentiment/', keepPetId=False)
 Y = pd.read_csv(datapath + '/train.csv', usecols=['AdoptionSpeed'])
 
-Y = pets.normalize_output(Y)
-
-# def weighted_crossentropy(labels, logits):
-#     return tf.losses.softmax_cross_entropy(
-#         labels,
-#         logits,
-#         weights=tf.abs(tf.argmax(logits, axis=1) - tf.argmax(labels, axis=1)),
-#     )
+# Y = pets.normalize_output(Y)
+Y = to_categorical(Y)
 
 
 input_units = X.shape[1]
@@ -36,12 +29,12 @@ model = pets.get_model(input_size=input_units)
 
 model_name = time.strftime('%Y-%m-%d-%H-%M-%S')
 
-model.compile(loss='mean_squared_error',
+model.compile(loss='categorical_crossentropy',
               optimizer='adam', metrics=['mean_squared_error', 'accuracy'])
 
 csvLogger = CSVLogger('data/' + model_name + '.csv')
 checkpoint = ModelCheckpoint('models/' + model_name + '.h5',
-                             monitor='val_mean_squared_error:', verbose=1, save_best_only=True, save_weights_only=True, mode='auto')
+                             monitor='val_acc', verbose=1, save_best_only=True, save_weights_only=True, mode='auto')
 
 callbacks = [csvLogger, checkpoint]
 history = model.fit(X, Y, epochs=100, shuffle=True, batch_size=512,

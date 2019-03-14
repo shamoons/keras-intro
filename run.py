@@ -31,19 +31,14 @@ input_units = test_X.shape[1]
 model = pets.get_model(input_size=input_units)
 model.compile(loss='categorical_crossentropy',
               optimizer='adam', metrics=['accuracy'])
-model.load_weights('models/2019-03-12-18-13-11.h5')
+model.load_weights('models/2019-03-14-10-58-35.h5')
 
 prediction = model.predict(test_X)
-
-# for index, pred in prediction.iterrows():
-#     print(index, pred)
-# X['prediction'] = prediction
-
+selectedY = prediction.argmax(1)
+print(prediction)
+print(selectedY)
 output = X[['PetID']]
-output['AdoptionSpeed'] = pets.denormalize_output(prediction)
+output['AdoptionSpeed'] = selectedY
 print(output)
-# output[]
-# print(prediction)
-# print(pets.denormalize_output(prediction))
 
 output.to_csv('submission.csv', index=False)

@@ -9,6 +9,21 @@ import os
 import pandas as pd
 import numpy as np
 
+from dotenv import load_dotenv
+load_dotenv()
+datapath = os.environ['DATA_PATH']
+
+
+def process_image_metadata(X):
+    annotations_file = 'image-annotations.json'
+    json_data = json.loads(open(annotations_file).read())
+
+    vector_size = len(json_data)
+    print(json_data)
+    print(X.shape)
+
+    return X
+
 
 def process_sentiment(X, sentiment_path):
     processedX = X
@@ -35,6 +50,7 @@ def load_input(petfile, sentiment_path, keepPetId=False):
                                    'FurLength', 'Vaccinated', 'Dewormed', 'Sterilized', 'Health', 'State'])
 
     X = process_sentiment(X, sentiment_path)
+    X = process_image_metadata(X)
 
     X = X.drop(['Description', 'AdoptionSpeed', 'Name', 'RescuerID'],
                axis=1, errors='ignore')
@@ -56,17 +72,13 @@ def load_input(petfile, sentiment_path, keepPetId=False):
 
 def normalize_output(Y):
     newY = Y / 4
-    # newY = pd.DataFrame([np.ones(x)
-    #                      for x in Y['AdoptionSpeed']]).fillna(0).astype(int)
 
     return newY
 
 
 def denormalize_output(y):
-    # output_values = np.array(
-    #     [[0, 0, 0, 0], [1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0], [1, 1, 1, 1]])
-    # ret = [np.argmin(np.linalg.norm(output_values-i, axis=1)) for i in y]
-    ret = np.rint(y * 4)
+    ret = (y * 4)
+    ret = ret.astype(int)
     return ret
 
 
@@ -107,6 +119,6 @@ def get_model(input_size):
     model.add(BatchNormalization())
     model.add(Dropout(0.5))
 
-    model.add(Dense(1, activation='sigmoid'))
+    model.add(Dense(5, activation='softmax'))
 
     return model
